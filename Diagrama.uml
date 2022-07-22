@@ -1,0 +1,197 @@
+@startuml
+allow_mixing
+
+package "sysfit" {
+    package "persistence"{
+        class User {
+             - id : Numeric
+             - name : String
+             - data_nascimento : Date
+             -email :String
+             -cpf :Numeric
+            
+             + numeric getId()
+             + numeric getName()
+             }
+             
+        class Hemograma{
+        -user_id:Numeric
+        -Eritograma : eritograma
+        -Leucograma : leucograma
+        + eritograma getEritograma()
+        + leucograma getLeucograma()
+        }
+        class Eritograma{
+        -HemaCias: numeric
+        -HemoGlobina: numeric
+        -HematoCrito: numeric
+        -VCM: numeric
+        -HCM:numeric
+        -CHCM:numeric
+        -RDW:numeric
+        
+        }
+        class Leucograma{
+        -Segmentados : numeric
+        -Bastonetes : numeric
+        -Eosinofilos : numeric
+        -Basofilos   :numeric
+        -Linfocitos  : numeric
+        -Monocitos   : numeric
+        }
+        
+        class colesterol{
+        
+        -uuid  :Numeric
+        -user_id:Numeric
+        -colesterol_toal :Float
+        -colesteroal_hd1 :Float
+        -colesteroal_ld1 :Float
+        -colesteroal_nao_hdl:Float
+        -data_preenchimento :Date
+        }
+        class bio_impedancia{
+          -uuid : Numeric
+          -user_id:Numeric
+          -massa_magra:Float
+          -massa_muscular:Float
+          -qt_aqua_corpo:Float
+          -gdr_visceral:Float
+          -massa_gorda :Float
+          -data_preenchimento:Date
+        
+        
+        
+        }
+        
+        
+    }
+    
+    package "persistencelayer"{
+        package "DAO"{
+            class UserDAO_Mongoose {
+                   + boolean create(user)
+                   + List<User> find()
+                   +List<Hemograma>find()
+                   +List<Leucograma> find()
+                   }
+            class UserDAO_MySQL{
+                   + boolean create(user)
+                   + List<User> find()
+                   +List<Hemograma>find()
+                   +List<Leucograma> find()
+            
+            }
+            interface IUserDAO <<interface>> {
+                 + boolean create(user)
+                 + boolean cadastrar(Hemograma) /'ta certo isso? '/
+                 + List<User> find()
+                 + List<Hemograma> find()
+                 + List<Leucograma> find()
+                 + List<Eritrograma> find()
+
+                  }
+            IUserDAO <|..left UserDAO_Mongoose
+            IUserDAO <|..right UserDAO_MySQL
+            /'
+            Eu tenho criar uma classe HemogramaDAO_Mongoose  para todos os exames ?
+            Ou posso colocar como exemplo acima?
+            '/
+            
+             
+        }
+       
+       
+        package "controller"{
+       
+           interface IUserController <<interface>> {
+                 + User create(user)
+                 + boolean login(user)
+                 
+                  }
+           interface IHemogramaController <<interface>>{
+                 + Hemograma  create(hemograma)
+                 +boolean hemogramaCadastro(hemograma)
+        
+           
+           }
+            class HemogramaController{
+                +Hemograma create(hemograma)
+                +Hemograma hemogramaCadastro(hemograma)
+            
+            }
+            class UserController{
+                  + User create(user)
+                  + boolean login(user)
+                  + Hemograma cadastrar
+                  }
+          
+          IUserController <|..left UserController        
+        
+        }
+        package "model"{
+            json "UserSchema" as userschema {
+                "id"  : "",
+                "email" : "",
+                "password": "",
+                "status" : "false"
+            }
+            json "HemogramaSchema " as hemogramaschema{
+                "eritograma" :" ",
+                "leucograma" :" "
+            
+            }
+            json "EritogramaSchema" as eritogramaSchema{
+                  "Hemacias" :"",
+                  "Hemoglobina" :"" 
+            
+            
+            }
+        }
+    }
+    package "servicelayer" {
+        package "View"{
+            interface IRoutes {
+                +void createroutes()
+            }
+            class UserRoutes {
+                +void createroutes()
+            }
+            IRoutes <|.. UserRoutes
+        }
+        package "DTO"{
+            json "UserLoginReq" as userloginreq {
+                "email" : "",
+                "password": ""
+            }
+            json "UserLoginRes" as userloginres {
+                "msgcode" : "001",
+                "userobject": "{}"
+            }
+            json "UserCreateReq" as usercreatereq{
+                "email" : "",
+                "password": "",
+                "confpassword": ""
+            }
+            json "UserCreateRes" as usercreateres{
+                "msgcode" : "002",
+                "userobject": "{}"
+            }
+
+        }
+
+    }
+
+}
+
+persistence -[hidden]--> persistencelayer
+persistencelayer -[hidden]--> servicelayer
+
+DAO -[hidden]--> model
+model -[hidden]--> controller
+
+
+''View -[hidden]--> DTO
+
+@enduml
+
